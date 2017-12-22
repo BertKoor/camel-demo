@@ -3,6 +3,7 @@ package nl.bertkoor.route;
 import lombok.extern.slf4j.Slf4j;
 import nl.bertkoor.model.TeamMember;
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.rest.RestBindingMode;
@@ -35,6 +36,7 @@ public class RestRoute extends RouteBuilder {
                 .apiProperty("api.contact.name", "The Commitments");
 
         onException(Exception.class)
+                .log(LoggingLevel.ERROR, "${exception.stacktrace}")
                 .handled(true)
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(500))
                 .setBody(constant(""));

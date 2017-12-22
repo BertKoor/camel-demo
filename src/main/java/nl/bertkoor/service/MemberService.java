@@ -1,11 +1,11 @@
 package nl.bertkoor.service;
 
-import org.springframework.stereotype.Service;
 import nl.bertkoor.model.TeamMember;
+import org.springframework.stereotype.Service;
 
 @Service
 public class MemberService {
-    public static final String MEMBER_SERVICE = MemberService.class.getSimpleName();
+    public static final String MEMBER_SERVICE = "memberService";
 
     public TeamMember getMember(String id) {
         TeamMember result = new TeamMember();

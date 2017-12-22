@@ -1,0 +1,12 @@
+server:
+  port: 7500
+  address: 0.0.0.0
+management:
+  address: 0.0.0.0
+camel:
+  springboot:
+    name: CamelServlet
+endpoints:
+  enabled: true
+  health:
+    enabled: true

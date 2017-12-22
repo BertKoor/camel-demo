@@ -6,14 +6,21 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.servlet.CamelHttpTransportServlet;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestParamType;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import static nl.bertkoor.service.MemberService.MEMBER_SERVICE;
 
 @Slf4j
 @Component
 public class RestRoute extends RouteBuilder {
+
+    @Value("${camel.springboot.name}")
+    String servletName;
 
     @Override
     public void configure() throws Exception {
@@ -22,13 +29,25 @@ public class RestRoute extends RouteBuilder {
         this.configTeamMember();
     }
 
+    @Bean
+    ServletRegistrationBean camelServlet() {
+        // use a @Bean to register the Camel servlet which we need to do
+        // because we want to use the camel-servlet component for the Camel REST service
+        ServletRegistrationBean mapping = new ServletRegistrationBean();
+        mapping.setName(servletName);
+        mapping.setLoadOnStartup(1);
+        // CamelHttpTransportServlet is the name of the Camel servlet to use
+        mapping.setServlet(new CamelHttpTransportServlet());
+        mapping.addUrlMappings("/*");
+        return mapping;
+    }
+
     private void configRestServer() {
         // https://github.com/camelinaction/camelinaction2/blob/master/chapter10/undertow-swagger/src/main/java/camelinaction/OrderRoute.java
         restConfiguration()
-                .component("netty4-http")
-                .bindingMode(RestBindingMode.json) // todo: json_xml
+                .component("servlet")
+                .bindingMode(RestBindingMode.json_xml)
                 .dataFormatProperty("prettyPrint", "true")
-                .port(7500)
                 .apiContextPath("/api-doc") // also /api-doc/swagger.yaml
                 .apiProperty("api.version", "1.0")
                 .apiProperty("api.title", "camel-demo")

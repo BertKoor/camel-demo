@@ -32,15 +32,13 @@ public class SslContextTest extends CamelTestSupport {
                         .setHeader(Exchange.HTTP_URI, constant("https://self-signed.badssl.com/"))
                         .to("http4:get")
                         .to("mock:result");
+
+                SSLContextParameters sslCtxParms = new RestServlet().buildSSLContextParameters();
+                CamelContext camelContext = this.getContext();
+                camelContext.setSSLContextParameters(sslCtxParms);
+                camelContext.getComponent("http4", HttpComponent.class).setUseGlobalSslContextParameters(true);
             }
         };
-    }
-
-    @Before
-    public void setupSslContext() {
-        SSLContextParameters sslCtxParms = new RestServlet().buildSSLContextParameters();
-        this.context().setSSLContextParameters(sslCtxParms);
-        this.context().getComponent("http4", HttpComponent.class).setUseGlobalSslContextParameters(true);
     }
 
     @Test

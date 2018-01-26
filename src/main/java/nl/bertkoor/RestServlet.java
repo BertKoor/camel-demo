@@ -1,5 +1,7 @@
 package nl.bertkoor;
 
+import org.apache.camel.CamelContext;
+import org.apache.camel.component.http4.HttpComponent;
 import org.apache.camel.component.servlet.CamelHttpTransportServlet;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.util.jsse.KeyStoreParameters;
@@ -33,7 +35,9 @@ public class RestServlet extends RouteBuilderWithRestExceptionHandling {
         from(ERROR_URI)
                 .transform().simple("${exception.message}");
 
-        getContext().setSSLContextParameters(this.buildSSLContextParameters());
+        CamelContext camelContext = this.getContext();
+        camelContext.setSSLContextParameters(this.buildSSLContextParameters());
+        camelContext.getComponent("http4", HttpComponent.class).setUseGlobalSslContextParameters(true);
     }
 
     @Bean

@@ -2,6 +2,7 @@ package nl.bertkoor;
 
 import org.apache.camel.component.servlet.CamelHttpTransportServlet;
 import org.apache.camel.model.rest.RestBindingMode;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,9 @@ public class RestServlet extends RouteBuilderWithRestExceptionHandling {
     String servletName;
 
     public static final String ERROR_URI = "direct:error";
+
+    @Autowired
+    private SslConfigFactory sslConfigFactory;
 
     @Override
     public void configure() {

@@ -10,3 +10,6 @@ endpoints:
   enabled: true
   health:
     enabled: true
+trust:
+  pwd: secret
+  store: /myTrustStore.jks

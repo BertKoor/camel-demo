@@ -13,10 +13,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 @RunWith(CamelSpringRunner.class)
-@ContextConfiguration(classes = {SslContextTest.CamelSpringTestConfig.class, SslConfig.class})
-//@TestPropertySource(properties = {"trust.pwd = Cchangeit", "trust.store = /myTrustStore.jks"})
+@ContextConfiguration(classes = {SslContextTest.CamelSpringTestConfig.class, SslConfigFactory.class})
+@TestPropertySource(properties = {"trust.pwd = secret", "trust.store = /myTrustStore.jks"})
 public class SslContextTest {
 
     @Produce(uri = "direct:start")
@@ -34,8 +35,7 @@ public class SslContextTest {
                 @Override
                 public void configure() throws Exception {
                     from("direct:start")
-                            .setHeader(Exchange.HTTP_URI, constant("https://self-signed.badssl.com/"))
-                            .to("http4:get")
+                            .to("https4://self-signed.badssl.com/")
                             .to("mock:result");
                 }
             };

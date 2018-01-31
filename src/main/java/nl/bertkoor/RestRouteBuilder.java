@@ -25,10 +25,10 @@ public class RestRouteBuilder extends RouteBuilderWithRestExceptionHandling {
     }
 
     private void configSelfSigned() {
-        rest("selfsigned").get()
+        rest("/selfsigned").get()
                 .route().routeId("selfsigned")
                 .setHeader(Exchange.HTTP_URI, constant("https://self-signed.badssl.com/"))
-                .to("http4:get")
+                .to("https4:get")
                 .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
                 .setBody(constant("HTTPS connection to self-signed.baddssl.com is OK !"));
     }

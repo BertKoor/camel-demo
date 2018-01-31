@@ -1,22 +1,23 @@
 package nl.bertkoor;
 
-import org.apache.camel.*;
+import org.apache.camel.EndpointInject;
+import org.apache.camel.Exchange;
+import org.apache.camel.Produce;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.builder.SimpleBuilder;
-import org.apache.camel.component.http4.HttpComponent;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.test.junit4.CamelTestSupport;
-import org.apache.camel.util.jsse.KeyStoreParameters;
-import org.apache.camel.util.jsse.SSLContextParameters;
-import org.apache.camel.util.jsse.TrustManagersParameters;
-import org.junit.Before;
+import org.apache.camel.spring.javaconfig.SingleRouteCamelConfiguration;
+import org.apache.camel.test.spring.CamelSpringRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.test.context.ContextConfiguration;
 
-import javax.net.ssl.SSLContext;
-
-import static org.junit.Assert.assertTrue;
-
-public class SslContextTest extends CamelTestSupport {
+@RunWith(CamelSpringRunner.class)
+@ContextConfiguration(classes = {SslContextTest.CamelSpringTestConfig.class, SslConfig.class})
+//@TestPropertySource(properties = {"trust.pwd = Cchangeit", "trust.store = /myTrustStore.jks"})
+public class SslContextTest {
 
     @Produce(uri = "direct:start")
     private ProducerTemplate producer;
@@ -24,28 +25,21 @@ public class SslContextTest extends CamelTestSupport {
     @EndpointInject(uri = "mock:result")
     private MockEndpoint resultEndpoint;
 
-    @Override
-    protected RoutesBuilder createRouteBuilder() throws Exception {
-        return new RouteBuilder() {
-            public void configure() {
-                from("direct:start")
-                        .setHeader(Exchange.HTTP_URI, constant("https://self-signed.badssl.com/"))
-                        .to("http4:get")
-                        .to("mock:result");
+    @TestConfiguration
+    public static class CamelSpringTestConfig extends SingleRouteCamelConfiguration {
 
-                SSLContextParameters sslCtxParms = new RestServlet().buildSSLContextParameters();
-                CamelContext camelContext = this.getContext();
-                camelContext.setSSLContextParameters(sslCtxParms);
-                camelContext.getComponent("http4", HttpComponent.class).setUseGlobalSslContextParameters(true);
-            }
-        };
-    }
-
-    @Test
-    public void testSetupSslContext() throws Exception {
-        SSLContextParameters sslCtxParms = new RestServlet().buildSSLContextParameters();
-        SSLContext sslContext = sslCtxParms.createSSLContext(this.context());
-        assertNotNull(sslContext);
+        @Override
+        public RouteBuilder route() {
+            return new RouteBuilder() {
+                @Override
+                public void configure() throws Exception {
+                    from("direct:start")
+                            .setHeader(Exchange.HTTP_URI, constant("https://self-signed.badssl.com/"))
+                            .to("http4:get")
+                            .to("mock:result");
+                }
+            };
+        }
     }
 
     @Test // optional run with -Djavax.net.debug=ssl

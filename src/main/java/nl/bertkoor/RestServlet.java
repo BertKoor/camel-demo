@@ -1,12 +1,7 @@
 package nl.bertkoor;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.component.http4.HttpComponent;
 import org.apache.camel.component.servlet.CamelHttpTransportServlet;
 import org.apache.camel.model.rest.RestBindingMode;
-import org.apache.camel.util.jsse.KeyStoreParameters;
-import org.apache.camel.util.jsse.SSLContextParameters;
-import org.apache.camel.util.jsse.TrustManagersParameters;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -34,10 +29,6 @@ public class RestServlet extends RouteBuilderWithRestExceptionHandling {
 
         from(ERROR_URI)
                 .transform().simple("${exception.message}");
-
-        CamelContext camelContext = this.getContext();
-        camelContext.setSSLContextParameters(this.buildSSLContextParameters());
-        camelContext.getComponent("http4", HttpComponent.class).setUseGlobalSslContextParameters(true);
     }
 
     @Bean
@@ -51,20 +42,6 @@ public class RestServlet extends RouteBuilderWithRestExceptionHandling {
         mapping.setServlet(new CamelHttpTransportServlet());
         mapping.addUrlMappings("/*");
         return mapping;
-    }
-
-    public SSLContextParameters buildSSLContextParameters() {
-        log.info("building SSLContextParameters");
-        KeyStoreParameters trustStore = new KeyStoreParameters();
-        trustStore.setResource("/myTrustStore.jks");
-        trustStore.setPassword("changeit");
-
-        TrustManagersParameters trustMgr = new TrustManagersParameters();
-        trustMgr.setKeyStore(trustStore);
-
-        SSLContextParameters sslCtxParms = new SSLContextParameters();
-        sslCtxParms.setTrustManagers(trustMgr);
-        return sslCtxParms;
     }
 
 }
